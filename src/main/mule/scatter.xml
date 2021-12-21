@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ea0332b3-57c4-4878-80a4-5984301aca89" >
+		<http:listener-connection host="0.0.0.0" port="8086" />
+	</http:listener-config>
+	<flow name="scatterFlow" doc:id="e8885ad3-fc78-4e0c-a957-2df1b592ae28" >
+		<http:listener doc:name="123123" doc:id="cb23d030-3b78-4324-9910-670da8dac50f" config-ref="HTTP_Listener_config" path="987"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="cb2139af-0cb8-4412-9b12-99e1a7f89387" maxConcurrency="30">
+			<route >
+				<ee:transform doc:name="Transform Message" doc:id="7076d1e8-5d21-447c-9ad9-2196db762eeb" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var a = 
+	[{"id":100,
+	 "name": "sai",
+	 "address":"banglore",
+	 "salary":10001
+	}]
+
+---
+  a map ((item,index) -> {
+	
+	"emp-id" : item.id + index,
+	"emp-name":"item.name",
+	"emp-address": "item.address",
+   "emp-salary ": "item.salary as Number default(0)"
+})
+ 
+   
+ 
+	
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="1aab237b-5d0f-46b3-9605-0de9612bdd80" message='"hi trinath"' />
+			</route>
+			<route>
+				<try doc:name="Try" doc:id="d1a72e01-0b9c-41bf-8936-5aed4f8eda7d" >
+					<logger level="INFO" doc:name="Logger" doc:id="83d356c8-45cc-4531-a17b-3b1437710239" message="#[nxczkbsdiufzdckadd]" />
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="444faf0d-abb8-4dc3-96ca-ea3f36663b6d" >
+							<set-payload value="error came ra pula" doc:name="error message" doc:id="a7b672e5-738b-4276-8d43-3cf68b1eeb04" />
+						</on-error-continue>
+					</error-handler>
+				</try>
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="Logger" doc:id="ed5df5c7-8559-482e-9e37-d08578fd205c" message="#[payload]" />
+	</flow>
+</mule>
